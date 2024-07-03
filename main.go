@@ -12,6 +12,7 @@ import (
 )
 
 func selectKeyboard(interactive bool) keylogger.KeyLogger {
+	// Find all keyboards and select the first one
 	keyboards := keylogger.FindAllKeyboardDevices()
 	active_keyboard := ""
 	logrus.Info("keyboards found: ", len(keyboards))
@@ -37,6 +38,7 @@ func selectKeyboard(interactive bool) keylogger.KeyLogger {
 		active_keyboard = keylogger.FindKeyboardDevice()
 		logrus.Infoln("Auto selected: ", active_keyboard)
 	} else {
+		// TODO: Implement interactive keyboard selection
 		logrus.Fatal("Interactive keyboard selection not implemented yet")
 	}
 
@@ -67,7 +69,8 @@ func startSending(logger keylogger.KeyLogger, host string, p string) {
 		switch e.Type {
 		case keylogger.EvKey:
 			if e.KeyPress() {
-				logrus.Info(fmt.Sprintf("[event] Logged keypress [%s]", e.KeyString()))
+				// Careful with the logs, they could contain sensitive information
+				// logrus.Info(fmt.Sprintf("[event] Logged keypress [%s]", e.KeyString()))
 				conn.Write([]byte(e.KeyString()))
 				logrus.Info("Sent key")
 			}
@@ -75,8 +78,8 @@ func startSending(logger keylogger.KeyLogger, host string, p string) {
 	}
 }
 
-func sartRecieving(logger keylogger.KeyLogger, host string, p string) {
-	listener, err := net.Listen("tcp", host+":"+p)
+func sartRecieving(logger keylogger.KeyLogger) {
+	listener, err := net.Listen("tcp", "localhost:6094")
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -96,7 +99,9 @@ func sartRecieving(logger keylogger.KeyLogger, host string, p string) {
 			if err != nil || n == 0 {
 				break
 			}
-			logrus.Info(fmt.Sprintf("Recieved key [%s]", buff))
+			// Careful with the logs, they could contain sensitive information
+			// logrus.Info(fmt.Sprintf("Recieved key [%s]", buff))
+			logrus.Info(fmt.Sprintf("Recieved key"))
 			logger.WriteOnce(string(buff))
 		}
 	}
@@ -104,23 +109,32 @@ func sartRecieving(logger keylogger.KeyLogger, host string, p string) {
 
 func main() {
 	logrus.Info("initializing program")
-	if len(os.Args) < 4 {
-		println("Usage: tkeyp [host] [port] [sender/reciever]")
-		return
-	}
-	host := os.Args[1]
-	port := os.Args[2]
-	role := os.Args[3]
-
 	logger := selectKeyboard(false)
 
-	switch role {
-	case "sender":
-		startSending(logger, host, port)
-	case "reciever":
-		sartRecieving(logger, host, port)
-	default:
-		logrus.Fatal("role has to be either [sender] or [reciever]")
+	if os.Args[1] != "sender" && os.Args[1] != "reciever" {
+		logrus.Fatal("Role has to be either [sender] or [reciever]")
 	}
 
+	role := os.Args[1]
+	if role == "sender" {
+		if len(os.Args) != 4 {
+			logrus.Fatal("The sender role needs a host and port to send the data to")
+		}
+		ip := net.ParseIP(os.Args[2])
+		if ip == nil {
+			logrus.Fatal("Invalid IP address")
+		}
+		host := os.Args[2]
+		port := os.Args[3]
+		startSending(logger, host, port)
+	}
+
+	if role == "reciever" {
+		if len(os.Args) > 2 {
+			logrus.Fatal("The reciever role does not need any arguments")
+		}
+		sartRecieving(logger)
+	}
+
+	logrus.Fatal("Usage: sudo ./keylogger [role] [host] [port]")
 }
