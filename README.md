@@ -19,3 +19,8 @@ sudo ./tkeyp [sender [ip address] [port]| reciever]
 ```
 
 Since the reciever just attaces to localhost:6094 there is no need to specify an ip address or port.
+
+## TODOs:
+
+* Support events other than key presses
+* Add tests
