@@ -24,3 +24,4 @@ Since the reciever just attaces to localhost:6094 there is no need to specify an
 
 * Support events other than key presses
 * Add tests
+* How much delay before there are ordering issues? Queue?
