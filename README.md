@@ -12,13 +12,13 @@ go build
 
 ## Usage
 
-Because this program interacts with the keyboard, it must be run as root. There need to be a sender and a reciever. The sender logs the keystrokes and the reciever simulates the keystrokes.
+Because this program interacts with the keyboard, it must be run as root. There needs to be a sender and a reciever. The sender logs the keystrokes and the reciever simulates the keystrokes.
 
 ```bash
 sudo ./tkeyp [sender [ip address] [port]| reciever] 
 ```
 
-Since the reciever just attaces to localhost:6094 there is no need to specify an ip address or port.
+Since the reciever just attaches to localhost:6094 there is no need to specify an ip address or port.
 
 ## TODOs:
 
